@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>角色管理</title>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+		<link rel="stylesheet" href="../../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../../css/font-awesome.min.css">
+		<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+		<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+		<link rel="stylesheet" href="../../css/main.css">
+		<link rel="stylesheet" href="../../css/AdminLTE.min.css">
+		<script src="../../libs/jquery.min.js"></script>
+		<script src="../../plugins/layer/layer.js"></script>
+		<script src="../../libs/bootstrap.min.js"></script>
+		<script src="../../libs/vue.min.js"></script>
+		<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+		<script src="../../js/common.js"></script>
+	</head>
+
+	<body>
+		<div id="app" v-cloak>
+			<div v-show="showList">
+				<div>
+					<div class="col-xs-12">
+						<div class="box">
+							<div class="box-header">
+								<h3 class="box-title">角色管理</h3>
+								<div class="box-tools">
+									<div class="input-group input-group-sm" s>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.role_name" placeholder="角色名">
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+										<input type="text" class="form-control " v-model="q.remark" placeholder="备注">
+										</div>	
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="reload">查询</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="add">增加</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="update">修改</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="del">删除</button>
+										</div>
+									
+									</div>
+								</div>
+							</div>
+							<!-- /.box-header -->
+							<div class="box-body table-responsive no-padding">
+								<table class="table table-hover table-striped">
+									<tbody>
+										<tr>
+											<th><input type='checkbox' v-model="ischeckall" @click="checkall" /></th>
+											<th>角色id</th>
+											<th>角色名称</th>
+											<th>备注</th>
+											<th>创建者</th>
+											<th>创建时间</th>
+										</tr>
+										<tr v-for="r in roleList">
+											<td><input type='checkbox' v-model='checkboxmodel' :value='r.roleId'  /></td>
+											<td>{{r.roleId}}</td>
+											<td>{{r.roleName}}</td>
+											<td>{{r.remark}}</td>
+											<td>{{r.createUserId}}</span>
+											</td>
+											<td v-if="r.createTime !=null">{{new Date(r.createTime).Format()}}</td>
+											<td v-else></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<div class="col-xs-12">
+						<select class="ui-pg-selbox form-control" style="display:inline;width:120px;">
+						<option role="option" value="10" selected="selected">10</option>
+						<option role="option" value="30">30</option>
+						<option role="option" value="50">50</option>
+					</select>
+					<ul class="pagination pagination-sm no-margin pull-right"  style="margin-right: 30px;">					
+						<li v-for="p in page">
+							<a href="#" @click="choosePage(p)" v-if="p.index==pageIndex" style="background: #d2d6de;">{{p.text}}</a>
+							<a href="#" @click="choosePage(p)" v-else="p.index==pageIndex">{{p.text}}</a>
+						</li>
+					</ul>
+					</div>
+				</div>
+			</div>
+
+			<div v-show="!showList" class="panel panel-default">
+				<div class="panel-heading">{{title}}</div>
+				<form class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-2 control-label">角色名称</div>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="role.roleName" placeholder="角色名称" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">备注</div>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="role.remark" placeholder="备注" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">授权</div>
+						<div class="col-sm-10">
+							<ul id="menuTree" class="ztree"></ul>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label"></div>
+						<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" /> &nbsp;&nbsp;
+						<input type="button" class="btn btn-warning" @click="reload" value="返回" />
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script src="../../js/sys/role.js"></script>
+	</body>
+
+</html>

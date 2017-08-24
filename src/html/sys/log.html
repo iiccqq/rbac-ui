@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>系统日志</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<link rel="stylesheet" href="../../css/AdminLTE.min.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../js/common.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+<script src="../../plugins/daterangepicker/daterangepicker.js"></script>
+</head>
+<body>
+<div id="app" v-cloak>
+	<div v-show="showList">
+		
+			<div>
+					<div class="col-xs-12">
+						<div class="box">
+							<div class="box-header">
+								<h3 class="box-title">系统日志</h3>
+								<div class="box-tools">
+									<div class="input-group input-group-sm">
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.username" placeholder="用户名"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.operation" placeholder="用户操作"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.method" placeholder="请求方法"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.params" placeholder="请求参数"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.time" placeholder="执行时长(毫秒)"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.ip" placeholder="IP地址"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text" class="form-control" id="create_date" />
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="reload">查询</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="add">增加</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="update">修改</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="del">删除</button>
+										</div>
+									
+									</div>
+								</div>
+							</div>
+							<!-- /.box-header -->
+							<div class="box-body table-responsive no-padding">
+								<table class="table table-hover  table-striped">
+									<tbody>
+										<tr>
+											<th><input type='checkbox' v-model="ischeckall" @click="checkall" /></th>
+											<th>用户名</th><th>用户操作</th><th>请求方法</th><th>请求参数</th><th>执行时长(毫秒)</th><th>IP地址</th><th>创建时间</th>										</tr>
+										<tr v-for="item in list">
+											<td><input type='checkbox' v-model='checkboxmodel' :value='item.id'  /></td>
+											<th v-if="item.username!=null">
+											{{item.username}}
+											</th><td v-else></td>
+											<th v-if="item.operation!=null">
+											{{item.operation}}
+											</th><td v-else></td>
+											<th v-if="item.method!=null">
+											{{item.method}}
+											</th><td v-else></td>
+											<th v-if="item.params!=null">
+											{{item.params}}
+											</th><td v-else></td>
+											<th v-if="item.time!=null">
+											{{item.time}}
+											</th><td v-else></td>
+											<th v-if="item.ip!=null">
+											{{item.ip}}
+											</th><td v-else></td>
+											<th v-if="item.createDate!=null">
+											{{new Date(item.createDate).Format()}}
+											</th><td v-else></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<div class="col-xs-12"><select class="ui-pg-selbox form-control" style="display:inline;width:70px;" role="listbox" title="Records per Page" v-model="pageSize">
+						<option role="option" value="10" selected="selected">10</option>
+						<option role="option" value="30">30</option>
+						<option role="option" value="50">50</option>
+					</select>
+					<ul class="pagination pagination-sm no-margin pull-right"  style="margin-right: 30px;">					
+						<li v-for="p in page">
+							<a href="#" @click="choosePage(p)" v-if="p.index==pageIndex" style="background: #d2d6de;">{{p.text}}</a>
+							<a href="#" @click="choosePage(p)" v-else="p.index==pageIndex">{{p.text}}</a>
+						</li>
+					</ul>
+					</div>
+				</div>
+		
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+											<div class="form-group">
+			   	<div class="col-sm-2 control-label">用户名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.username" placeholder="用户名"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">用户操作</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.operation" placeholder="用户操作"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">请求方法</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.method" placeholder="请求方法"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">请求参数</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.params" placeholder="请求参数"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">执行时长(毫秒)</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.time" placeholder="执行时长(毫秒)"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">IP地址</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.ip" placeholder="IP地址"/>
+			    </div>
+			</div>
+									<div class="form-group">
+			   	<div class="col-sm-2 control-label">创建时间</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.createDate" placeholder="创建时间"/>
+			    </div>
+			</div>
+							<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="../../js/sys/log.js"></script>
+</body>
+</html>

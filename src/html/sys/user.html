@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>管理员列表</title>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+		<link rel="stylesheet" href="../../css/bootstrap.min.css">
+		<link rel="stylesheet" href="../../css/font-awesome.min.css">
+		<link rel="stylesheet" href="../../css/AdminLTE.min.css">
+		<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+		<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+		<link rel="stylesheet" href="../../css/main.css">
+		<script src="../../libs/jquery.min.js"></script>
+		<script src="../../plugins/layer/layer.js"></script>
+		<script src="../../libs/bootstrap.min.js"></script>
+		<script src="../../libs/vue.min.js"></script>
+		<script src="../../libs/validator.min.js"></script>
+		<script src="../../js/common.js"></script>
+	</head>
+
+	<body>
+		<div id="app" v-cloak>
+			<div v-show="showList">
+				<div>
+					<div class="col-xs-12">
+						<div class="box">
+							<div class="box-header">
+								<h3 class="box-title">用户管理</h3>
+								<div class="box-tools">
+									<div class="input-group input-group-sm">
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text" class="form-control" v-model="q.username" placeholder="用户名">
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<select class="ui-pg-selbox form-control" v-model="q.status" >
+												<option role="option" value="-1" selected="selected">所有</option>
+												<option role="option" value="1" selected="selected">正常</option>
+												<option role="option" value="0">禁止</option>
+											</select>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="query">查询</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="add">增加</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="update">修改</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="del">删除</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- /.box-header -->
+							<div class="box-body table-responsive no-padding">
+								<table class="table table-hover  table-striped">
+									<tbody>
+										<tr>
+											<th><input type='checkbox' v-model="ischeckall" @click="checkall" /></th>
+											<th>用户id</th>
+											<th>用户名</th>
+											<th>状态</th>
+											<th>创建时间</th>
+										</tr>
+										<tr v-for="u in userList">
+											<td><input type='checkbox' v-model="checkboxmodel" :value="u.userId" /></td>
+											<td>{{u.userId}}</td>
+											<td>{{u.username}}</td>
+											<td v-if="u.status == 1"><span class="label label-success">正常</span></td>
+											<td v-else><span class="label label-danger">禁止</span></td>
+											<td>{{new Date(u.createTime).Format()}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<div class="col-xs-12"><select class="ui-pg-selbox form-control" style="display:inline;width:120px;" >
+						<option role="option" value="10" selected="selected">10</option>
+						<option role="option" value="30">30</option>
+						<option role="option" value="50">50</option>
+					</select>
+					<ul class="pagination pagination-sm no-margin pull-right"  style="margin-right: 30px;">					
+						<li v-for="p in page">
+							<a href="#" @click="choosePage(p)" v-if="p.index==pageIndex" style="background: #d2d6de;">{{p.text}}</a>
+							<a href="#" @click="choosePage(p)" v-else="p.index==pageIndex">{{p.text}}</a>
+						</li>
+					</ul>
+					</div>
+				</div>
+			</div>
+			<div v-show="!showList" class="panel panel-default">
+				<div class="panel-heading">{{title}}</div>
+				<form class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-2 control-label">用户名</div>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="user.username" placeholder="登录账号" />
+						</div>
+					</div>
+					<div class="form-group" v-show="user.userId==null">
+						<div class="col-sm-2 control-label">密码</div>
+						<div class="col-sm-10">
+							<input type="password" class="form-control" v-model="user.password" placeholder="密码" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">邮箱</div>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="user.email" placeholder="邮箱" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">手机号</div>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" v-model="user.mobile" placeholder="手机号" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">角色</div>
+						<div class="col-sm-10">
+							<label v-for="role in roleList" class="checkbox-inline">
+						  		<input type="checkbox" :value="role.roleId" v-model="user.roleIdList">{{role.roleName}}
+							</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label">状态</div>
+						<label class="radio-inline">
+				  <input type="radio" name="status" value="0" v-model="user.status"/> 禁用
+				</label>
+						<label class="radio-inline">
+				  <input type="radio" name="status" value="1" v-model="user.status"/> 正常
+				</label>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-2 control-label"></div>
+						<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" /> &nbsp;&nbsp;
+						<input type="button" class="btn btn-warning" @click="reload" value="返回" />
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script src="../../js/sys/user.js"></script>
+	</body>
+
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>系统配置信息表</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<link rel="stylesheet" href="../../css/AdminLTE.min.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../js/common.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+<script src="../../plugins/daterangepicker/daterangepicker.js"></script>
+</head>
+<body>
+<div id="app" v-cloak>
+	<div v-show="showList">
+		
+			<div>
+					<div class="col-xs-12">
+						<div class="box">
+							<div class="box-header">
+								<h3 class="box-title">系统配置信息表</h3>
+								<div class="box-tools">
+									<div class="input-group input-group-sm">
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.parentid" placeholder="父id"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.value" placeholder="值"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.text" placeholder="文本"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<select class="ui-pg-selbox form-control" v-model="q.status" style="display:inline;width:120px;" >
+												<option role="option" :value="s.value" selected="selected" v-for="s in qselect.status">{{s.text}}</option>											
+											</select>	
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.remark" placeholder="备注"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:120px;">
+											<input type="text"  class="form-control" v-model="q.code" placeholder="别名"/>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="reload">查询</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="add">增加</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="update">修改</button>
+										</div>
+										<div class="input-group-btn" style="padding-left: 5px;width:60px;">
+											<button type="button" class="btn btn-block btn-primary" @click="del">删除</button>
+										</div>
+									
+									</div>
+								</div>
+							</div>
+							<!-- /.box-header -->
+							<div class="box-body table-responsive no-padding">
+								<table class="table table-hover  table-striped">
+									<tbody>
+										<tr>
+											<th><input type='checkbox' v-model="ischeckall" @click="checkall" /></th>
+											<th>父id</th><th>值</th><th>文本</th><th>状态   0：正常  1：停用</th><th>备注</th><th>别名</th>										</tr>
+										<tr v-for="item in list">
+											<td><input type='checkbox' v-model='checkboxmodel' :value='item.id'  /></td>
+											<th v-if="item.parentid!=null">
+											{{item.parentid}}
+											</th><td v-else></td>
+											<th v-if="item.value!=null">
+											{{item.value}}
+											</th><td v-else></td>
+											<th v-if="item.text!=null">
+											{{item.text}}
+											</th><td v-else></td>
+											<th v-if="item.status!=null">
+											{{item.status}}
+											</th><td v-else></td>
+											<th v-if="item.remark!=null">
+											{{item.remark}}
+											</th><td v-else></td>
+											<th v-if="item.code!=null">
+											{{item.code}}
+											</th><td v-else></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<div class="col-xs-12">
+						<select class="ui-pg-selbox form-control" style="display:inline;width:70px;" role="listbox" title="Records per Page" v-model="pageSize">
+						<option role="option" value="10" selected="selected">10</option>
+						<option role="option" value="30">30</option>
+						<option role="option" value="50">50</option>
+					</select>
+					<ul class="pagination pagination-sm no-margin pull-right"  style="margin-right: 30px;">					
+						<li v-for="p in page">
+							<a href="#" @click="choosePage(p)" v-if="p.index==pageIndex" style="background: #d2d6de;">{{p.text}}</a>
+							<a href="#" @click="choosePage(p)" v-else="p.index==pageIndex">{{p.text}}</a>
+						</li>
+					</ul>
+					</div>
+				</div>
+		
+    </div>
+    
+    <div v-show="!showList" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">父id</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.parentid" placeholder="父id"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">值</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.value" placeholder="值"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">文本</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.text" placeholder="文本"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">状态   0：正常  1：停用</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.status" placeholder="状态   0：正常  1：停用"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">备注</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.remark" placeholder="备注"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">别名</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="item.code" placeholder="别名"/>
+			    </div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script src="../../js/sys/config.js"></script>
+</body>
+</html>
